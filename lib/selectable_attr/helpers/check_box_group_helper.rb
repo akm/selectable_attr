@@ -20,7 +20,7 @@ module SelectableAttr::Helpers
       
       def each(&block)
         @entry_hash_array.each do |@entry_hash|
-          @tag_value = @entry_hash[:id].to_s.gsub(/\s/, "_").gsub(/\W/, "").downcase
+          @tag_value = @entry_hash[:id].to_s.gsub(/\s/, "_").gsub(/\W/, "")
           @check_box_id = "#{@object_name}_#{@param_name}_#{@tag_value}"
           yield(self)
         end
