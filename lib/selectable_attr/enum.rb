@@ -5,8 +5,9 @@ module SelectableAttr
     
     attr_reader :entries
     
-    def initialize
+    def initialize(&block)
       @entries = []
+      instance_eval(&block) if block_given?
     end
     
     def each(&block)
@@ -20,7 +21,7 @@ module SelectableAttr
     alias_method :entry, :define
     
     def match_entry(entry, value, *attrs)
-      attrs.any?{|attr| entry.send(attr).to_s == value.to_s}
+      attrs.any?{|attr| entry[attr].to_s == value.to_s}
     end
 
     def entry_by(value, *attrs)
@@ -38,7 +39,14 @@ module SelectableAttr
     def entry_by_id_or_key(id_or_key)
       entry_by(id_or_key, :id, :key)
     end
-    alias_method :[], :entry_by_id_or_key
+    
+    def entry_by_hash(attrs)
+      @entries.detect{|entry| attrs.all?{|(attr, value)| entry[attr].to_s == value.to_s }} || Entry::NULL
+    end
+    
+    def [](arg)
+      arg.is_a?(Hash) ? entry_by_hash(arg) : entry_by_id_or_key(arg)
+    end
     
     def values(*args)
       args = args.empty? ? [:name, :id] : args
@@ -92,7 +100,8 @@ module SelectableAttr
     alias_method :size, :length
 
     class Entry
-      attr_reader :id, :key, :name
+      BASE_ATTRS = [:id, :key, :name]
+      attr_reader *BASE_ATTRS
       def initialize(id, key, name, options = nil, &block)
         @id = id
         @key = key
@@ -101,7 +110,9 @@ module SelectableAttr
         self.instance_eval(&block) if block
       end
       
+      
       def [](option_key)
+        BASE_ATTRS.include?(option_key) ? send(option_key) :
         @options ? @options[option_key] : nil
       end
       
