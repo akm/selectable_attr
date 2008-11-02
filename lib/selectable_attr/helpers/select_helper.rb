@@ -15,7 +15,7 @@ module SelectableAttr::Helpers
             "(object, method, options = {}, html_options = {})"
         end
         return select_without_attr_enumeable(object_name, method, *args, &block) if args.length == 3
-        return select_without_attr_enumeable(object_name, method, *args, &block)  if args.first.is_a?(Array)
+        return select_without_attr_enumeable(object_name, method, *args, &block) if args.first.is_a?(Array)
         options, html_options = *args
         options = update_enum_select_options(options, object_name, method)
         object, base_name = options[:object], options[:base_name]
