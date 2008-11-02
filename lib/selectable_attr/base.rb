@@ -68,7 +68,7 @@ module SelectableAttr
       
       
       def enum_array(*args, &block)
-        base_options = args.extract_options!
+        base_options = args.extract_options! # last.is_a?(Hash) ? args.pop : {}
         args << base_options # .update({:attr_accessor => false})
         process_definition(block, *args) do |enum, context|
           define_enum_class_methods(context)
@@ -78,7 +78,7 @@ module SelectableAttr
       alias_method :multi_selectable_attr, :enum_array
       
       def process_definition(block, *args)
-        base_options = args.extract_options!
+        base_options = args.extract_options! # last.is_a?(Hash) ? args.pop : {}
         enum = base_options[:enum] || create_enum(&block)
         args.each do |attr|
           context = {
