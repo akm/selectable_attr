@@ -57,8 +57,24 @@ module SelectableAttr
     }
     
     module ClassMethods
+      def single_selectable_attrs 
+        @single_selectable_attrs_hash ||= {};
+        @single_selectable_attrs_hash[self] ||= []
+      end
+      
+      def multi_selectable_attrs 
+        @multi_selectable_attrs_hash ||= {};
+        @multi_selectable_attrs_hash[self] ||= []
+      end
+      
+      def selectable_attr_type_for(attr)
+        single_selectable_attrs.include?(attr) ? :single :
+        multi_selectable_attrs.include?(attr) ? :multi : nil
+      end
+      
       def enum(*args, &block)
         process_definition(block, *args) do |enum, context|
+          self.single_selectable_attrs << context[:attr].to_s
           define_enum_class_methods(context)
           define_enum_instance_methods(context)
         end
@@ -68,9 +84,10 @@ module SelectableAttr
       
       
       def enum_array(*args, &block)
-        base_options = args.extract_options! # last.is_a?(Hash) ? args.pop : {}
+        base_options = args.extract_options!
         args << base_options # .update({:attr_accessor => false})
         process_definition(block, *args) do |enum, context|
+          self.multi_selectable_attrs << context[:attr].to_s
           define_enum_class_methods(context)
           define_enum_array_instance_methods(context)
         end
@@ -78,7 +95,7 @@ module SelectableAttr
       alias_method :multi_selectable_attr, :enum_array
       
       def process_definition(block, *args)
-        base_options = args.extract_options! # last.is_a?(Hash) ? args.pop : {}
+        base_options = args.extract_options!
         enum = base_options[:enum] || create_enum(&block)
         args.each do |attr|
           context = {
