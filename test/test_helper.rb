@@ -1,6 +1,7 @@
 require 'test/unit'
 
 require 'rubygems'
+require 'activerecord'
 require 'activesupport'
 
 

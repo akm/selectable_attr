@@ -15,10 +15,15 @@ module SelectableAttr
     end
     
     def define(id, key, name, options = nil, &block)
-      entry = Entry.new(id, key, name, options, &block)
+      entry = Entry.new(self, id, key, name, options, &block)
       @entries << entry
     end
     alias_method :entry, :define
+    
+    def i18n_scope(*path)
+      @i18n_scope = path unless path.empty?
+      @i18n_scope
+    end
     
     def match_entry(entry, value, *attrs)
       attrs.any?{|attr| entry[attr].to_s == value.to_s}
@@ -101,8 +106,9 @@ module SelectableAttr
 
     class Entry
       BASE_ATTRS = [:id, :key, :name]
-      attr_reader *BASE_ATTRS
-      def initialize(id, key, name, options = nil, &block)
+      attr_reader :id, :key
+      def initialize(enum, id, key, name, options = nil, &block)
+        @enum = enum
         @id = id
         @key = key
         @name = name
@@ -110,6 +116,15 @@ module SelectableAttr
         self.instance_eval(&block) if block
       end
       
+      if defined?(I18n)
+        def name
+          I18n.locale.nil? ? @name :
+            @enum.i18n_scope.blank? ? @name :
+            I18n.translate(key, :scope => @enum.i18n_scope, :default => @name)
+        end
+      else
+        attr_reader :name
+      end
       
       def [](option_key)
         BASE_ATTRS.include?(option_key) ? send(option_key) :
@@ -132,8 +147,9 @@ module SelectableAttr
         (@options || {}).merge(:id => @id, :key => @key, :name => @name)
       end
       
-      NULL = new(nil, nil, nil) do
+      NULL = new(nil, nil, nil, nil) do
         def null?; true; end
+        def name; nil; end
       end
     end
   end

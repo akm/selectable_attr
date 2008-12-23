@@ -107,6 +107,7 @@ module SelectableAttr
           define_enum(context)
           define_accessor(context)
           yield(enum, context)
+          enum.i18n_scope(:selectable_attrs, attr.to_sym) unless enum.i18n_scope
         end
         enum
       end
