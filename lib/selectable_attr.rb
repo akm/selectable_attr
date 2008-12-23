@@ -1,5 +1,5 @@
 module SelectableAttr
-  VERSION = '0.0.1'
+  VERSION = '0.0.2'
   
   autoload :Enum, 'selectable_attr/enum'
   autoload :Base, 'selectable_attr/base'

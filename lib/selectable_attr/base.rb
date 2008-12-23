@@ -125,9 +125,21 @@ module SelectableAttr
         if @base_name_processor
           @base_name_processor.call(attr).to_s
         else
-          attr.to_s.gsub(/(_cd$|_code$|_cds$|_codes$)/, '')
+          attr.to_s.gsub(selectable_attr_name_pattern, '')
         end
       end
+      
+      DEFAULT_SELECTABLE_ATTR_NAME_PATTERN = /(_cd$|_code$|_cds$|_codes$)/
+      
+      def selectable_attr_name_pattern
+        @selectable_attr_name_pattern ||= DEFAULT_SELECTABLE_ATTR_NAME_PATTERN
+      end
+      alias_method :enum_name_pattern, :selectable_attr_name_pattern
+      
+      def selectable_attr_name_pattern=(value)
+        @selectable_attr_name_pattern = value
+      end
+      alias_method :enum_name_pattern=, :selectable_attr_name_pattern=
       
       def create_enum(&block)
         result = Enum.new
@@ -137,7 +149,8 @@ module SelectableAttr
       
       def define_enum(context)
         base_name = context[:base_name]
-        const_set("#{base_name.upcase}_ENUM", context[:enum])
+        const_name = "#{base_name.upcase}_ENUM"
+        const_set(const_name, context[:enum]) unless const_defined?(const_name)
       end
       
       def enum_for(attr)
@@ -147,6 +160,7 @@ module SelectableAttr
       
       def define_accessor(context)
         attr = context[:attr]
+        return unless (instance_methods(false) & [attr, "#{attr}="]).empty? 
         if context[:attr_accessor]
           if context[:default]
             attr_accessor_with_default(attr, context[:default])

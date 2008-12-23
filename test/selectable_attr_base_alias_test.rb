@@ -531,4 +531,34 @@ class SelectableAttrBaseTest < Test::Unit::TestCase
     mock5.enum_array1_ids = "2"  ; assert_equal('2'  , mock5.enum_array1)
   end
   
+  class EnumMock6 < EnumBase
+    # self.selectable_attr_name_pattern = /(_cd$|_code$|_cds$|_codes$)/
+    selectable_attr :category_id do 
+      entry "01", :category1, "カテゴリ1"
+      entry "02", :category2, "カテゴリ2"
+    end
+  end
+  
+  class EnumMock7 < EnumBase
+    self.selectable_attr_name_pattern = /(_cd$|_id$|_cds$|_ids$)/
+    selectable_attr :category_id do 
+      entry "01", :category1, "カテゴリ1"
+      entry "02", :category2, "カテゴリ2"
+    end
+  end
+  
+  def test_selectable_attr_name_pattern
+    assert_equal /(_cd$|_code$|_cds$|_codes$)/, EnumMock6.selectable_attr_name_pattern
+    assert_equal false, EnumMock6.respond_to?(:category_enum)
+    assert_equal true , EnumMock6.respond_to?(:category_id_enum)
+    assert_equal false, EnumMock6.new.respond_to?(:category_key)
+    assert_equal true , EnumMock6.new.respond_to?(:category_id_key)
+    
+    assert_equal /(_cd$|_id$|_cds$|_ids$)/, EnumMock7.selectable_attr_name_pattern
+    assert_equal true , EnumMock7.respond_to?(:category_enum)
+    assert_equal false, EnumMock7.respond_to?(:category_id_enum)
+    assert_equal true , EnumMock7.new.respond_to?(:category_key)
+    assert_equal false, EnumMock7.new.respond_to?(:category_id_key)
+  end
+
 end
