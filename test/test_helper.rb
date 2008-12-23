@@ -1,14 +1,24 @@
 require 'test/unit'
 
-require 'rubygems'
-require 'activerecord'
-require 'activesupport'
+FIXTURES_ROOT = File.join(File.dirname(__FILE__), 'fixtures') unless defined?(FIXTURES_ROOT)
 
+require 'rubygems'
+require 'active_support'
+require 'active_record'
+require 'active_record/fixtures'
+require 'active_record/test_case'
+require 'action_view'
 
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
-require 'selectable_attr'
+require File.join(File.dirname(__FILE__), '..', 'init')
 
-# require File.expand_path(File.join(File.dirname(__FILE__), '../../../../config/environment.rb'))
+require 'yaml'
+config = YAML.load(IO.read(File.join(File.dirname(__FILE__), 'database.yml')))
+ActiveRecord::Base.logger = Logger.new(File.join(File.dirname(__FILE__), 'debug.log'))
+ActiveRecord::Base.establish_connection(config[ENV['DB'] || 'sqlite3'])
+
+load(File.join(File.dirname(__FILE__), 'schema.rb'))
+
 
 class Test::Unit::TestCase
   
