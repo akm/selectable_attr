@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 module SelectableAttr
-  VERSION = '0.0.2'
+  VERSION = '0.0.2' # バージョンアップする前に変更します
   
   autoload :Enum, 'selectable_attr/enum'
   autoload :Base, 'selectable_attr/base'
