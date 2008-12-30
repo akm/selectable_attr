@@ -1,3 +1,4 @@
+$KCODE='u'
 require 'test/unit'
 
 FIXTURES_ROOT = File.join(File.dirname(__FILE__), 'fixtures') unless defined?(FIXTURES_ROOT)

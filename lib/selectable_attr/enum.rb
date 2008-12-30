@@ -2,20 +2,24 @@ module SelectableAttr
 
   class Enum
     include Enumerable
-    
-    attr_reader :entries
+    include SelectableAttr::DbLoadable
     
     def initialize(&block)
       @entries = []
       instance_eval(&block) if block_given?
     end
     
+    def entries
+      @entries
+    end
+    
     def each(&block)
-      @entries.each(&block)
+      entries.each(&block)
     end
     
     def define(id, key, name, options = nil, &block)
       entry = Entry.new(self, id, key, name, options, &block)
+      entry.instance_variable_set(:@defined_in_code, true)
       @entries << entry
     end
     alias_method :entry, :define
@@ -30,7 +34,7 @@ module SelectableAttr
     end
 
     def entry_by(value, *attrs)
-      @entries.detect{|entry| match_entry(entry, value, *attrs)} || Entry::NULL
+      entries.detect{|entry| match_entry(entry, value, *attrs)} || Entry::NULL
     end
     
     def entry_by_id(id)
@@ -46,7 +50,7 @@ module SelectableAttr
     end
     
     def entry_by_hash(attrs)
-      @entries.detect{|entry| attrs.all?{|(attr, value)| entry[attr].to_s == value.to_s }} || Entry::NULL
+      entries.detect{|entry| attrs.all?{|(attr, value)| entry[attr].to_s == value.to_s }} || Entry::NULL
     end
     
     def [](arg)
@@ -55,14 +59,14 @@ module SelectableAttr
     
     def values(*args)
       args = args.empty? ? [:name, :id] : args
-      result = @entries.collect{|entry| args.collect{|arg| entry.send(arg) }}
+      result = entries.collect{|entry| args.collect{|arg| entry.send(arg) }}
       (args.length == 1) ? result.flatten : result
     end
     
     def map_attrs(attrs, *ids_or_keys)
       if attrs.is_a?(Array)
         ids_or_keys.empty? ? 
-          @entries.map{|entry| attrs.map{|attr|entry.send(attr)}} : 
+          entries.map{|entry| attrs.map{|attr|entry.send(attr)}} : 
           ids_or_keys.map do |id_or_key|
             entry = entry_by_id_or_key(id_or_key)
             attrs.map{|attr|entry.send(attr)}
@@ -70,7 +74,7 @@ module SelectableAttr
       else
         attr = attrs
         ids_or_keys.empty? ? 
-          @entries.map(&attr.to_sym) : 
+          entries.map(&attr.to_sym) : 
           ids_or_keys.map{|id_or_key|entry_by_id_or_key(id_or_key).send(attr)}
       end
     end
@@ -86,13 +90,13 @@ module SelectableAttr
     def name_by_key(key); entry_by_key(key).name; end
     
     def find(options = nil, &block)
-      @entries.detect{|entry| 
+      entries.detect{|entry| 
           block_given? ? yield(entry) : entry.match?(options) 
         } || Entry::NULL
     end
     
     def to_hash_array
-      @entries.map do |entry|
+      entries.map do |entry|
         result = entry.to_hash
         yield(result) if defined? yield
         result
@@ -100,13 +104,14 @@ module SelectableAttr
     end
     
     def length
-      @entries.length
+      entries.length
     end
     alias_method :size, :length
 
     class Entry
       BASE_ATTRS = [:id, :key, :name]
       attr_reader :id, :key
+      attr_reader :defined_in_code
       def initialize(enum, id, key, name, options = nil, &block)
         @enum = enum
         @id = id
@@ -152,6 +157,7 @@ module SelectableAttr
         def name; nil; end
       end
     end
+    
   end
 
 end

@@ -5,4 +5,5 @@ module SelectableAttr
   autoload :Enum, 'selectable_attr/enum'
   autoload :Base, 'selectable_attr/base'
   autoload :Helpers, 'selectable_attr/helpers'
+  autoload :DbLoadable, 'selectable_attr/db_loadable'
 end

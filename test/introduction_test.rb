@@ -176,7 +176,81 @@ class IntroductionTest < Test::Unit::TestCase
       Product1.product_type_options)
   end
 
+  # selectable_attrのエントリ名をDB上に保持するためのモデル
+  class ItemMaster < ActiveRecord::Base
+  end
   
+  # selectable_attrを使った場合その２
+  # アクセス時に毎回アクセス時にDBから項目名を取得します。
+  class ProductWithDB1 < ActiveRecord::Base
+    set_table_name 'products'
+    
+    selectable_attr :product_type_cd do
+      update_by(
+        "select item_cd, name from item_masters where category_name = 'product_type_cd' order by item_no", 
+        :when => :everytime)
+      entry '01', :book, '書籍', :discount => 0.8
+      entry '02', :dvd, 'DVD', :discount => 0.2
+      entry '03', :cd, 'CD', :discount => 0.5
+      entry '09', :other, 'その他', :discount => 1
+    end
+
+    def discount_price
+      (product_type_entry[:discount] * price).to_i
+    end
+  end
+  
+  def test_update_entry_name
+    # DBに全くデータがなくてもコードで記述してあるエントリは存在します。
+    ItemMaster.delete_all("category_name = 'product_type_cd'")
+    assert_equal 4, ProductWithDB1.product_type_entries.length
+    assert_equal '書籍', ProductWithDB1.product_type_name_by_key(:book)
+    assert_equal 'DVD', ProductWithDB1.product_type_name_by_key(:dvd)
+    assert_equal 'CD', ProductWithDB1.product_type_name_by_key(:cd)
+    assert_equal 'その他', ProductWithDB1.product_type_name_by_key(:other)
+
+    assert_product_discount(ProductWithDB1)
+    
+    # DBからエントリの名称を動的に変更できます
+    item_book = ItemMaster.create(:category_name => 'product_type_cd', :item_no => 1, :item_cd => '01', :name => '本')
+    assert_equal 4, ProductWithDB1.product_type_entries.length
+    assert_equal '本', ProductWithDB1.product_type_name_by_key(:book)
+    assert_equal 'DVD', ProductWithDB1.product_type_name_by_key(:dvd)
+    assert_equal 'CD', ProductWithDB1.product_type_name_by_key(:cd)
+    assert_equal 'その他', ProductWithDB1.product_type_name_by_key(:other)
+    assert_equal [['本', '01'], ['DVD', '02'], ['CD', '03'], ['その他', '09']], ProductWithDB1.product_type_options
+    
+    # DBからエントリの並び順を動的に変更できます
+    item_book.item_no = 4;
+    item_book.save!
+    item_other = ItemMaster.create(:category_name => 'product_type_cd', :item_no => 1, :item_cd => '09', :name => 'その他')
+    item_dvd = ItemMaster.create(:category_name => 'product_type_cd', :item_no => 2, :item_cd => '02') # nameは指定しなかったらデフォルトが使われます。
+    item_cd = ItemMaster.create(:category_name => 'product_type_cd', :item_no => 3, :item_cd => '03') # nameは指定しなかったらデフォルトが使われます。
+    assert_equal [['その他', '09'], ['DVD', '02'], ['CD', '03'], ['本', '01']], ProductWithDB1.product_type_options
+    
+    # DBからエントリを動的に追加することも可能です。
+    item_toys = ItemMaster.create(:category_name => 'product_type_cd', :item_no => 5, :item_cd => '04', :name => 'おもちゃ')
+    assert_equal [['その他', '09'], ['DVD', '02'], ['CD', '03'], ['本', '01'], ['おもちゃ', '04']], ProductWithDB1.product_type_options
+    assert_equal :entry_04, ProductWithDB1.product_type_key_by_id('04')
+    
+    # DBからレコードを削除してもコードで定義したentryは削除されません。
+    # 順番はDBからの取得順で並び替えられたものの後になります
+    item_dvd.destroy
+    assert_equal [['その他', '09'], ['CD', '03'], ['本', '01'], ['おもちゃ', '04'], ['DVD', '02']], ProductWithDB1.product_type_options
+    
+    # DB上で追加したレコードを削除すると、エントリも削除されます
+    item_toys.destroy
+    assert_equal [['その他', '09'], ['CD', '03'], ['本', '01'], ['DVD', '02']], ProductWithDB1.product_type_options
+
+    # 名称を指定していたDBのレコードを削除したら元に戻ります。
+    item_book.destroy
+    assert_equal [['その他', '09'], ['CD', '03'], ['書籍', '01'], ['DVD', '02']], ProductWithDB1.product_type_options
+    
+    # エントリに該当するレコードを全部削除したら、元に戻ります。
+    ItemMaster.delete_all("category_name = 'product_type_cd'")
+    assert_equal [['書籍', '01'], ['DVD', '02'], ['CD', '03'], ['その他', '09']], ProductWithDB1.product_type_options
+    assert_product_discount(ProductWithDB1)
+  end
   
   
   # Q: product_type_cd の'_cd'はどこにいっちゃったの？
