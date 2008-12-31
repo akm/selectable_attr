@@ -124,5 +124,111 @@ if defined?(I18n)
       assert_equal [["entry one",1], ["entry two",2], ["entry three",3]], SelectableAttrMock2.enum1_options
     end
 
+    # i18n用のlocaleカラムを持つselectable_attrのエントリ名をDB上に保持するためのモデル
+    class I18nItemMaster < ActiveRecord::Base
+    end
+
+    # selectable_attrを使った場合その3
+    # アクセス時に毎回アクセス時にDBから項目名を取得します。
+    # 対象となる項目名はi18n対応している名称です
+    class ProductWithI18nDB1 < ActiveRecord::Base
+      set_table_name 'products'
+      selectable_attr :product_type_cd do
+        # update_byメソッドには、エントリのidと名称を返すSELECT文を指定する代わりに、
+        # エントリのidと名称の配列の配列を返すブロックを指定することも可能です。
+        update_by(:when => :everytime) do
+          records = I18nItemMaster.find(:all, 
+            :conditions => [
+              "category_name = 'product_type_cd' and locale = ? ", I18n.locale.to_s],
+            :order => "item_no")
+          records.map{|r| [r.item_cd, r.name]}
+        end
+        entry '01', :book, '書籍', :discount => 0.8
+        entry '02', :dvd, 'DVD', :discount => 0.2
+        entry '03', :cd, 'CD', :discount => 0.5
+        entry '09', :other, 'その他', :discount => 1
+      end
+
+    end
+
+    def test_update_entry_name_with_i18n
+      I18n.locale = 'ja'
+      # DBに全くデータがなくてもコードで記述してあるエントリは存在します。
+      I18nItemMaster.delete_all("category_name = 'product_type_cd'")
+      assert_equal 4, ProductWithI18nDB1.product_type_entries.length
+      assert_equal '書籍', ProductWithI18nDB1.product_type_name_by_key(:book)
+      assert_equal 'DVD', ProductWithI18nDB1.product_type_name_by_key(:dvd)
+      assert_equal 'CD', ProductWithI18nDB1.product_type_name_by_key(:cd)
+      assert_equal 'その他', ProductWithI18nDB1.product_type_name_by_key(:other)
+
+      # assert_product_discount(ProductWithI18nDB1)
+
+      # DBからエントリの名称を動的に変更できます
+      item_book = I18nItemMaster.create(:locale => 'ja', :category_name => 'product_type_cd', :item_no => 1, :item_cd => '01', :name => '本')
+      assert_equal 4, ProductWithI18nDB1.product_type_entries.length
+      assert_equal '本', ProductWithI18nDB1.product_type_name_by_key(:book)
+      assert_equal 'DVD', ProductWithI18nDB1.product_type_name_by_key(:dvd)
+      assert_equal 'CD', ProductWithI18nDB1.product_type_name_by_key(:cd)
+      assert_equal 'その他', ProductWithI18nDB1.product_type_name_by_key(:other)
+      assert_equal [['本', '01'], ['DVD', '02'], ['CD', '03'], ['その他', '09']], ProductWithI18nDB1.product_type_options
+
+      # DBからエントリの並び順を動的に変更できます
+      item_book.item_no = 4;
+      item_book.save!
+      item_other = I18nItemMaster.create(:locale => 'ja', :category_name => 'product_type_cd', :item_no => 1, :item_cd => '09', :name => 'その他')
+      item_dvd = I18nItemMaster.create(:locale => 'ja', :category_name => 'product_type_cd', :item_no => 2, :item_cd => '02') # nameは指定しなかったらデフォルトが使われます。
+      item_cd = I18nItemMaster.create(:locale => 'ja', :category_name => 'product_type_cd', :item_no => 3, :item_cd => '03') # nameは指定しなかったらデフォルトが使われます。
+      assert_equal [['その他', '09'], ['DVD', '02'], ['CD', '03'], ['本', '01']], ProductWithI18nDB1.product_type_options
+
+      # DBからエントリを動的に追加することも可能です。
+      item_toys = I18nItemMaster.create(:locale => 'ja', :category_name => 'product_type_cd', :item_no => 5, :item_cd => '04', :name => 'おもちゃ')
+      assert_equal [['その他', '09'], ['DVD', '02'], ['CD', '03'], ['本', '01'], ['おもちゃ', '04']], ProductWithI18nDB1.product_type_options
+      assert_equal :entry_04, ProductWithI18nDB1.product_type_key_by_id('04')
+
+      # 英語名を登録
+      item_book = I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 4, :item_cd => '01', :name => 'Book')
+      item_other = I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 1, :item_cd => '09', :name => 'Others')
+      item_dvd = I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 2, :item_cd => '02', :name => 'DVD')
+      item_cd = I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 3, :item_cd => '03', :name => 'CD')
+      item_toys = I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 5, :item_cd => '04', :name => 'Toy')
+      
+      # 英語名が登録されていてもI18n.localeが変わらなければ、日本語のまま
+      assert_equal [['その他', '09'], ['DVD', '02'], ['CD', '03'], ['本', '01'], ['おもちゃ', '04']], ProductWithI18nDB1.product_type_options
+      assert_equal :entry_04, ProductWithI18nDB1.product_type_key_by_id('04')
+      
+      # I18n.localeを変更すると取得できるエントリの名称も変わります
+      I18n.locale = 'en'
+      assert_equal [['Others', '09'], ['DVD', '02'], ['CD', '03'], ['Book', '01'], ['Toy', '04']], ProductWithI18nDB1.product_type_options
+      assert_equal :entry_04, ProductWithI18nDB1.product_type_key_by_id('04')
+
+      I18n.locale = 'ja'
+      assert_equal [['その他', '09'], ['DVD', '02'], ['CD', '03'], ['本', '01'], ['おもちゃ', '04']], ProductWithI18nDB1.product_type_options
+      assert_equal :entry_04, ProductWithI18nDB1.product_type_key_by_id('04')
+      
+      I18n.locale = 'en'
+      assert_equal [['Others', '09'], ['DVD', '02'], ['CD', '03'], ['Book', '01'], ['Toy', '04']], ProductWithI18nDB1.product_type_options
+      assert_equal :entry_04, ProductWithI18nDB1.product_type_key_by_id('04')
+
+      # DBからレコードを削除してもコードで定義したentryは削除されません。
+      # 順番はDBからの取得順で並び替えられたものの後になります
+      item_dvd.destroy
+      assert_equal [['Others', '09'], ['CD', '03'], ['Book', '01'], ['Toy', '04'], ['DVD', '02']], ProductWithI18nDB1.product_type_options
+
+      # DB上で追加したレコードを削除すると、エントリも削除されます
+      item_toys.destroy
+      assert_equal [['Others', '09'], ['CD', '03'], ['Book', '01'], ['DVD', '02']], ProductWithI18nDB1.product_type_options
+
+      # 名称を指定していたDBのレコードを削除したら元に戻ります。
+      item_book.destroy
+      assert_equal [['Others', '09'], ['CD', '03'], ['書籍', '01'], ['DVD', '02']], ProductWithI18nDB1.product_type_options
+
+      # エントリに該当するレコードを全部削除したら、元に戻ります。
+      I18nItemMaster.delete_all("category_name = 'product_type_cd'")
+      assert_equal [['書籍', '01'], ['DVD', '02'], ['CD', '03'], ['その他', '09']], ProductWithI18nDB1.product_type_options
+    end
+
+
+
+  
   end
 end

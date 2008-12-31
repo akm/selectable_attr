@@ -1,8 +1,9 @@
 module SelectableAttr
   module DbLoadable
-    def update_by(sql, options = nil)
-      options = {:when => :first_time}.update(options || {})
-      @sql_to_update = sql
+    def update_by(*args, &block)
+      options = args.last.is_a?(Hash) ? args.pop : {}
+      options = {:when => :first_time}.update(options)
+      @sql_to_update = block_given? ? block : args.first
       @update_timing = options[:when]
       self.extend(InstanceMethods) unless respond_to?(:update_entries)
     end
@@ -26,14 +27,20 @@ module SelectableAttr
       end
       
       def update_entries
-        @connection ||= ActiveRecord::Base.connection
         unless @original_entries
           @original_entries = @entries.dup
           @original_entries.each do |entry|
             entry.extend(SelectableAttr::DbLoadable::Entry)
           end
         end
-        records = @connection.select_rows(@sql_to_update)
+        records = nil
+        if @sql_to_update.respond_to?(:call)
+          records = @sql_to_update.call
+        else
+          @connection ||= ActiveRecord::Base.connection
+          records = @connection.select_rows(@sql_to_update)
+        end
+        
         new_entries = []
         records.each do |r|
           if entry = @original_entries.detect{|entry| entry.id == r.first}
