@@ -253,6 +253,8 @@ class IntroductionTest < Test::Unit::TestCase
   end
   
   
+
+  
   # Q: product_type_cd の'_cd'はどこにいっちゃったの？
   # A: デフォルトでは、/(_cd$|_code$|_cds$|_codes$)/ を削除したものをbase_nameとして
   #    扱い、それに_keyなどを付加してメソッド名を定義します。もしこのルールを変更したい場合、
