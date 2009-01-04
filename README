@@ -1,7 +1,7 @@
 = SelectableAttr
 == Introduction
-selectable_attr は、コードが割り振られるような特定の属性について、コード、プログラム上での名前、
-表示するための名前をまとめて管理するものです。
+selectable_attr は、コードが割り振られるような特定の属性について*コード*、*プログラム上での名前*、
+*表示するための名前*などをまとめて管理するものです。
 
 == Install
 === 1. Railsプロジェクトで使う場合
@@ -18,9 +18,12 @@ selectable_attr は、コードが割り振られるような特定の属性に�
 
 
 
-== Example
+== Tutorial
 
 === シンプルなパターン
+ require 'rubygems'
+ require 'selectable_attr'
+
  class Person
    include ::SelectableAttr::Base
    
@@ -76,6 +79,9 @@ genderが代入可能なことはもちろん、gender_keyも代入可能です�
 
 
 === 複数の値を取りうるパターン
+ require 'rubygems'
+ require 'selectable_attr'
+
  class RoomSearch
    include ::SelectableAttr::Base
    
@@ -120,6 +126,201 @@ multi_selectable_attrを使った場合に使用できるクラスメソッド�
  irb> room_search.room_type_hash_array_selected
  => [{:select=>true, :key=>:single, :name=>"シングル", :id=>"01"}, {:select=>true, :key=>:triple, :name=>"トリプル", :id=>"04"}]
 
+
+
+=== Entry
+==== エントリの取得
+エントリは様々な拡張が可能です。例えば以下のようにid、key、name以外の属性を設定することも可能です。
+
+ require 'rubygems'
+ require 'selectable_attr'
+
+ class Site
+   include ::SelectableAttr::Base
+   
+   selectable_attr :protocol do
+     entry '01', :http , 'HTTP'      , :port => 80
+     entry '02', :https, 'HTTPS'     , :port => 443
+     entry '03', :ssh  , 'SSH'       , :port => 22
+     entry '04', :svn  , 'Subversion', :port => 3690
+   end
+ end
+ 
+クラスメソッドで各エントリを取得することが可能です。
+ entry = Site.protocol_entry_by_key(:https)
+ entry = Site.protocol_entry_by_id('02')
+
+インスタンスメソッドでは以下のように取得できます。
+ site = Site.new
+ site.protocol_key = :https
+ entry = site.protocol_entry
+
+==== エントリの属性
+id, key, nameもそのままメソッドとして用意されています。
+ irb>  entry.id
+ => "02"
+ irb>  entry.key
+ => :https
+ irb>  entry.name
+ => "HTTPS"
+
+またオプションの属性もHashのようにアクセス可能です。
+ irb> entry[:port]
+ => 443
+
+to_hashメソッドで、id, key, nameを含むHashを作成します。
+ irb> entry.to_hash
+ => {:key=>:https, :port=>443, :name=>"HTTPS", :id=>"02"}
+
+matchメソッドでid,key,nameを除くオプションの属性群と一致しているかどうかを判断可能です。
+
+ irb> entry.match?(:port => 22)
+ => false
+ irb> entry.match?(:port => 443)
+ => true
+
+ # ここではオプションの属性として:portしか設定していないので、matchに渡すHashのキーと値の組み合わせも一つだけですが、
+ # 複数ある場合にmatch?がtrueとなるためには、完全に一致している必要があります。
+
+
+==== クラスメソッドでのエントリの扱い
+クラスメソッドでエントリを取得する方法として、xxx_entry_by_id, xxx_entry_by_keyを紹介しましたが、
+全てのエントリで構成される配列を取得するメソッドが xxx_entriesです。
+
+ irb> entries = Site.protocol_entries
+ irb> entries.length
+ => 4
+
+また、各エントリをto_hashでHashに変換した配列を xxx_hash_arrayメソッドで取得することも可能です。
+ irb> Site.protocol_hash_array
+ => [
+  {:key=>:http, :port=>80, :name=>"HTTP", :id=>"01"}, 
+  {:key=>:https, :port=>443, :name=>"HTTPS", :id=>"02"}, 
+  {:key=>:ssh, :port=>22, :name=>"SSH", :id=>"03"}, 
+  {:key=>:svn, :port=>3690, :name=>"Subversion", :id=>"04"} 
+ ]
+
+
+=== Enum
+あまり表にでてきませんが、エントリをまとめる役割のオブジェクトがEnumです。
+これはクラスメソッドxxx_enumで取得することができます。
+
+ irb> enum = Site.protocol_enum
+
+Enumには以下のようなメソッドが用意されています。
+ irb> enum.entries
+ irb> enum.entries.map{|entry| entry[:port]}
+ => [80, 443, 22, 3690]
+ 
+EnumはEnumerableをincludeしているため、以下のように記述することも可能です。
+ irb> enum.map{|entry| entry[:port]}
+ => [80, 443, 22, 3690]
+
+ irb>  enum.entry_by_id("03")
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+ irb>  enum.entry_by_key(:ssh)
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+ irb>  enum.entry_by_id_or_key(:ssh)
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+ irb>  enum.entry_by_id_or_key('03')
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+ irb>  enum.entry_by_hash(:port => 22)
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+ 
+また、これらのメソッドが面倒と感じるようであれば、以下のような簡単なアクセスも可能です。
+ irb>  enum['03']
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+ irb>  enum[:ssh]
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+ irb>  enum[:port => 22]
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+
+またクラスメソッドで紹介したようなxxx_ids, xxx_keys, xxx_namesや、xxx_key_by_idなどのメソッドも用意されています。
+ irb> enum.ids
+ => ["01", "02", "03", "04"]
+ irb> enum.keys
+ => [:http, :https, :ssh, :svn]
+ irb> enum.names
+ => ["HTTP", "HTTPS", "SSH", "Subversion"]
+ irb> enum.options
+ => [["HTTP", "01"], ["HTTPS", "02"], ["SSH", "03"], ["Subversion", "04"]]
+ irb> enum.key_by_id('04')
+ => :svn
+ irb> enum.id_by_key(:svn)
+ => "04"
+ irb> enum.name_by_id('04')
+ => "Subversion"
+ irb> enum.name_by_key(:svn)
+ => "Subversion"
+ irb> enum.to_hash_array
+ => [
+   {:key=>:http, :port=>80, :name=>"HTTP", :id=>"01"}, 
+   {:key=>:https, :port=>443, :name=>"HTTPS", :id=>"02"}, 
+   {:key=>:ssh, :port=>22, :name=>"SSH", :id=>"03"}, 
+   {:key=>:svn, :port=>3690, :name=>"Subversion", :id=>"04"}
+ ]
+
+id, key以外でエントリを特定したい場合はfindメソッドが使えます。 
+ irb>  enum.find(:port => 22)
+ => #<SelectableAttr::Enum::Entry:1352a54 @id="03", @key=:ssh, @name="SSH", @options={:port=>22}
+ 
+findメソッドにはブロックを渡すこともできます。
+ irb>  enum.find{|entry| entry[:port] > 1024}
+ => #<SelectableAttr::Enum::Entry:1352a04 @id="04", @key=:svn, @name="Subversion", @options={:port=>3690}
+
+
+=== Entryへのメソッド定義
+entryメソッドにブロックを渡すとエントリのオブジェクトにメソッドを定義することが可能です。
+
+ require 'rubygems'
+ require 'selectable_attr'
+
+ class Site
+   include ::SelectableAttr::Base
+   
+   selectable_attr :protocol do
+     entry '01', :http , 'HTTP', :port => 80 do
+       def accept?(model)
+         # httpで指定された場合はhttpsも可、という仕様
+         model.url =~ /^http[s]{0,1}\:\/\//
+       end
+     end
+
+     entry '02', :https, 'HTTPS', :port => 443 do
+       def accept?(model)
+         model.url =~ /^https\:\/\//
+       end
+     end
+
+     entry '03', :ssh  , 'SSH', :port => 22 do
+       def accept?(model)
+         false
+       end
+     end
+
+     entry '04', :svn  , 'Subversion', :port => 3690 do
+       def accept?(model)
+         model.url =~ /^svn\:\/\/|^svn+ssh\:\/\//
+       end
+     end
+
+   end
+ end
+
+ enum = Site.protocol_enum
+ 
+ class Project
+   attr_accessor :url
+ end
+ project = Project.new
+ project.url = "http://github.com/akm/selectable_attr/tree/master"
+ 
+ irb>  enum[:http].accept?(project)
+ => 0
+ irb>  enum[:https].accept?(project)
+ => nil
+
+ というようにentryメソッドに渡したブロックは、生成されるエントリオブジェクトのコンテキストでinstance_evalされるので、そのメソッドを定義することが可能です。
 
 
 
