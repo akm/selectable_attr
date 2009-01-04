@@ -114,4 +114,16 @@ describe SelectableAttr::Enum do
       ]
   end
 
+  describe "find" do
+    it "with options" do
+      InetAccess.find(:protocol => 'http://').should == InetAccess[2]
+      InetAccess.find(:protocol => 'svn+ssh://').should == SelectableAttr::Enum::Entry::NULL
+    end
+
+    it "with block" do
+      InetAccess.find{|entry| entry.key.to_s =~ /tp/}.should == InetAccess[3]
+      InetAccess.find{|entry| entry.key.to_s =~ /XXXXXX/}.should == SelectableAttr::Enum::Entry::NULL
+    end
+  end
+
 end

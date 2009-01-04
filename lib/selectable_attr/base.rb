@@ -68,8 +68,8 @@ module SelectableAttr
       end
       
       def selectable_attr_type_for(attr)
-        single_selectable_attrs.include?(attr) ? :single :
-        multi_selectable_attrs.include?(attr) ? :multi : nil
+        single_selectable_attrs.include?(attr.to_s) ? :single :
+        multi_selectable_attrs.include?(attr.to_s) ? :multi : nil
       end
       
       def enum(*args, &block)
@@ -168,7 +168,8 @@ module SelectableAttr
       
       def enum_for(attr)
         base_name = enum_base_name(attr)
-        const_get("#{base_name.upcase}_ENUM")
+        name = "#{base_name.upcase}_ENUM"
+        const_defined?(name) ? const_get(name) : nil
       end
       
       def define_accessor(context)
@@ -261,8 +262,6 @@ module SelectableAttr
             ids = ids ? ids.map(&:to_s) : []
             update_#{base_name}_hash_array{|hash|ids.include?(hash[:id].to_s)}
           end
-        EOS
-        self.module_eval(<<-"EOS")
           def #{base_name}_hash_array
             self.class.#{base_name}_to_hash_array(self.class.#{base_name}_enum, #{attr})
           end
