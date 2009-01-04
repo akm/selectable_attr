@@ -1,13 +1,128 @@
-SelectableAttr
-==============
+= SelectableAttr
+== Introduction
+selectable_attr は、コードが割り振られるような特定の属性について、コード、プログラム上での名前、
+表示するための名前をまとめて管理するものです。
 
-Introduction goes here.
+== Install
+=== 1. Railsプロジェクトで使う場合
+==== a. plugin install
+ ruby script/plugin install git://github.com/akm/selectable_attr.git
+ ruby script/plugin install git://github.com/akm/selectable_attr_rails.git
+
+==== b. gem install
+ [sudo] gem install akimatter-selectable_attr akimatter-selectable_attr_rails -s http://gems.github .com
+
+=== 2. 非Railsで使う場合
+==== a. gem install
+ [sudo] gem install akimatter-selectable_attr -s http://gems.github .com
 
 
-Example
-=======
 
-Example goes here.
+== Example
+
+=== シンプルなパターン
+ class Person
+   include ::SelectableAttr::Base
+   
+   selectable_attr :gender do
+     entry '1', :male, '男性'
+     entry '2', :female, '女性'
+     entry '9', :other, 'その他'
+   end
+ end
+
+上記のようなクラスがあった場合、以下のようなクラスメソッドを使うことが可能です。
+
+ irb(main):020:0> Person.gender_ids
+ => ["1", "2", "9"]
+ irb(main):021:0> Person.gender_keys
+ => [:male, :female, :other]
+ irb(main):022:0> Person.gender_names
+ => ["男性", "女性", "その他"]
+ irb(main):023:0> Person.gender_options
+ => [["男性", "1"], ["女性", "2"], ["その他", "9"]] # railsでoptions_for_selectメソッドなどに使えます。
+ irb(main):024:0> Person.gender_key_by_id("1")
+ => :male
+ irb(main):025:0> Person.gender_name_by_id("1")
+ => "男性"
+ irb(main):026:0> Person.gender_id_by_key(:male) # 特定のキーから対応するidを取得できます。
+ => "1"
+ irb(main):027:0> Person.gender_name_by_key(:male)
+ => "男性"
+
+また使用可能なインスタンスメソッドには以下のようなものがあります。
+ 
+ irb> person = Person.new
+ => #<Person:0x133b9d0>
+ irb> person.gender_key
+ => nil
+ irb> person.gender_name
+ => nil
+ irb> person.gender = "2"
+ => "2"
+ irb> person.gender_key
+ => :female
+ irb> person.gender_name
+ => "女性"
+ irb> person.gender_key = :other
+ => :other
+ irb> person.gender
+ => "9"
+ irb> person.gender_name
+ => "その他"
+
+genderが代入可能なことはもちろん、gender_keyも代入可能です。
+# ただし、gender_nameには代入できません。
 
 
-Copyright (c) 2008 Takeshi AKIMA, released under the MIT license
+=== 複数の値を取りうるパターン
+ class RoomSearch
+   include ::SelectableAttr::Base
+   
+   multi_selectable_attr :room_type do
+     entry '01', :single, 'シングル'
+     entry '02', :twin, 'ツイン'
+     entry '03', :double, 'ダブル'
+     entry '04', :triple, 'トリプル'
+   end
+ end
+
+multi_selectable_attrを使った場合に使用できるクラスメソッドは、selectable_attrの場合と同じです。
+
+ irb> room_search = RoomSearch.new
+ => #<RoomSearch:0x134a070>
+ irb> room_search.room_type_ids
+ => []
+ irb> room_search.room_type_keys
+ => []
+ irb> room_search.room_type_names
+ => []
+ irb> room_search.room_type_selection
+ => [false, false, false, false]
+ irb> room_search.room_type_keys = [:twin, :double]
+ => [:twin, :double]
+ irb> room_search.room_type
+ => ["02", "03"]
+ irb> room_search.room_type_names
+ => ["ツイン", "ダブル"]
+ irb> room_search.room_type_ids
+ => ["02", "03"]
+ irb> room_search.room_type = ["01", "04"]
+ => ["01", "04"]
+ irb> room_search.room_type_keys
+ => [:single, :triple]
+ irb> room_search.room_type_names
+ => ["シングル", "トリプル"]
+ irb> room_search.room_type_selection
+ => [true, false, false, true]
+ irb> room_search.room_type_hash_array
+ => [{:select=>true, :key=>:single, :name=>"シングル", :id=>"01"}, {:select=>false, :key=>:twin, :name=>"ツイン", :id=>"02"}, {:select=>false, :key=>:double, :name=>"ダブル", :id=>"03"}, {:select=>true, :key=>:triple, :name=>"トリプル", :id=>"04"}]
+ irb> room_search.room_type_hash_array_selected
+ => [{:select=>true, :key=>:single, :name=>"シングル", :id=>"01"}, {:select=>true, :key=>:triple, :name=>"トリプル", :id=>"04"}]
+
+
+
+
+
+== Credit
+Copyright (c) 2008 Takeshi AKIMA, released under the MIT lice nse
