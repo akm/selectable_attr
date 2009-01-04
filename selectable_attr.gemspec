@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.has_rdoc = false
 
   s.files = [
+    "MIT-LICENSE", "README", 
     "Rakefile", "init.rb", "install.rb", "uninstall.rb", 
     "lib/selectable_attr/base.rb",
     "lib/selectable_attr/enum.rb",
