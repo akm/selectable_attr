@@ -235,7 +235,7 @@ describe SelectableAttr do
     end
 
     it "test_multi_selectable_attr_with_binary_string" do
-      expected = (0..7).map{|i| '%-03b' % i} # ["000", "001", "010", "011", "100", "101", "110", "111"]
+      expected = (0..7).map{|i| '%03b' % i} # ["000", "001", "010", "011", "100", "101", "110", "111"]
       assert_enum_class_methods(EnumMock3, :enum_array1)
       assert_multi_enum_instance_methods(EnumMock3.new, expected)
       assert_enum_class_methods(EnumMock3WithEnumArray, :enum_array1)
