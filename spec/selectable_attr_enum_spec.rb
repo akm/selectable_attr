@@ -23,7 +23,7 @@ describe SelectableAttr::Enum do
     Enum1[2].name.should == 'DVD'
     Enum1[3].name.should == 'CD'
     Enum1[4].name.should == 'VHS'
-    
+
     Enum1[:book].id.should == 1
     Enum1[:dvd ].id.should == 2
     Enum1[:cd  ].id.should == 3
@@ -36,7 +36,7 @@ describe SelectableAttr::Enum do
     Enum1[:dvd].name.should  == 'DVD'
     Enum1[:cd].name.should   == 'CD'
     Enum1[:vhs].name.should  == 'VHS'
-    
+
     Enum1.values.should == [['書籍', 1], ['DVD', 2], ['CD', 3], ['VHS', 4]]
     Enum1.values(:name, :id).should == [['書籍', 1], ['DVD', 2], ['CD', 3], ['VHS', 4]]
     Enum1.values(:name, :key).should == [['書籍', :book], ['DVD', :dvd], ['CD', :cd], ['VHS', :vhs]]
@@ -55,8 +55,8 @@ describe SelectableAttr::Enum do
     InetAccess[1].key.should == :email
     InetAccess[2].key.should == :website
     InetAccess[3].key.should == :ftp
-    
-    
+
+
     InetAccess[1].name.should == 'Eメール'
     InetAccess[2].name.should == 'ウェブサイト'
     InetAccess[3].name.should == 'FTP'
@@ -76,7 +76,7 @@ describe SelectableAttr::Enum do
     InetAccess[:protocol => 'http://'].should == InetAccess[2]
     InetAccess[:protocol => 'ftp://'].should == InetAccess[3]
   end
-  
+
   it "test_null?" do
     InetAccess[1].null?.should == false
     InetAccess[2].null?.should == false
@@ -87,7 +87,7 @@ describe SelectableAttr::Enum do
     InetAccess[:protocol => 'ftp://'].null?.should == false
     InetAccess[:protocol => 'svn://'].null?.should == true
   end
-  
+
   it "test_null_object?" do
     InetAccess[1].null_object?.should == false
     InetAccess[2].null_object?.should == false
@@ -98,7 +98,7 @@ describe SelectableAttr::Enum do
     InetAccess[:protocol => 'ftp://'].null_object?.should == false
     InetAccess[:protocol => 'svn://'].null_object?.should == true
   end
-  
+
   it "test_to_hash_array" do
     Enum1.to_hash_array.should == [
         {:id => 1, :key => :book, :name => '書籍'},
@@ -106,7 +106,7 @@ describe SelectableAttr::Enum do
         {:id => 3, :key => :cd, :name => 'CD'},
         {:id => 4, :key => :vhs, :name => 'VHS'}
       ]
-    
+
     InetAccess.to_hash_array.should == [
         {:id => 1, :key => :email, :name => 'Eメール', :protocol => 'mailto:'},
         {:id => 2, :key => :website, :name => 'ウェブサイト', :protocol => 'http://'},

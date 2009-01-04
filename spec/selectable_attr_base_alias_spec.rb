@@ -3,7 +3,7 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 require 'stringio'
 
 describe SelectableAttr do
-  
+
   def assert_enum_class_methods(klass, attr = :enum1)
     klass.send("#{attr}_enum").length.should == 3
     expected_hash_array = [
@@ -46,27 +46,27 @@ describe SelectableAttr do
     klass.send("#{attr}_name_by_id", 2).should == "エントリ2"
     klass.send("#{attr}_name_by_id", 3).should == "エントリ3"
   end
-  
+
   def assert_single_enum_instance_methods(obj, attr = :enum1)
     obj.send("#{attr}=", 1)
     obj.send(attr).should == 1
-    obj.enum1_key.should == :entry1 
+    obj.enum1_key.should == :entry1
     obj.enum1_name.should == "エントリ1"
     obj.enum1_entry.to_hash.should == {:id => 1, :key => :entry1, :name => "エントリ1"}
-    
+
     obj.enum1_key = :entry2
     obj.send(attr).should == 2
     obj.enum1_key.should == :entry2
     obj.enum1_name.should == "エントリ2"
     obj.enum1_entry.to_hash.should == {:id => 2, :key => :entry2, :name => "エントリ2"}
-    
+
     obj.send("#{attr}=", 3)
     obj.send(attr).should == 3
     obj.enum1_key.should == :entry3
     obj.enum1_name.should == "エントリ3"
     obj.enum1_entry.to_hash.should == {:id => 3, :key => :entry3, :name => "エントリ3"}
   end
-  
+
   class EnumBase
     include ::SelectableAttr::Base
   end
@@ -103,7 +103,7 @@ describe SelectableAttr do
       EnumMock1WithEnum.selectable_attr_type_for(:enum1).should == :single
     end
   end
-  
+
 
   describe "attr_enumeable_base" do
     class EnumMock2 < EnumBase
@@ -138,7 +138,7 @@ describe SelectableAttr do
     end
   end
 
-  
+
   def assert_multi_enum_instance_methods(obj, patterns)
     obj.enum_array1_hash_array.should == [
         {:id => 1, :key => :entry1, :name => "エントリ1", :select => false},
@@ -150,7 +150,7 @@ describe SelectableAttr do
     obj.enum_array1_entries.should == []
     obj.enum_array1_keys.should == []
     obj.enum_array1_names.should == []
-    
+
     obj.enum_array1 = patterns[0]
     obj.enum_array1.should == patterns[0]
     obj.enum_array1_hash_array.should == [
@@ -174,7 +174,7 @@ describe SelectableAttr do
     obj.enum_array1_entries.map(&:id).should == [3]
     obj.enum_array1_keys.should == [:entry3]
     obj.enum_array1_names.should == ['エントリ3']
-    
+
     obj.enum_array1 = patterns[3]
     obj.enum_array1.should == patterns[3]
     obj.enum_array1_hash_array.should == [
@@ -199,7 +199,7 @@ describe SelectableAttr do
     obj.enum_array1_entries.map(&:id).should == [1, 2, 3]
     obj.enum_array1_keys.should == [:entry1, :entry2, :entry3]
     obj.enum_array1_names.should == ['エントリ1', 'エントリ2', 'エントリ3']
-    
+
     obj.enum_array1_ids = [1,3]; obj.enum_array1.should == patterns[5]
     obj.enum_array1_ids = [1,2]; obj.enum_array1.should == patterns[6]
     obj.enum_array1_ids = [2]; obj.enum_array1.should == patterns[2]
@@ -216,7 +216,7 @@ describe SelectableAttr do
     obj.enum_array1_ids = "1,2"; obj.enum_array1.should == patterns[6]
     obj.enum_array1_ids = "2"; obj.enum_array1.should == patterns[2]
   end
-  
+
   describe ":convert_with => :binary_string" do
     class EnumMock3 < EnumBase
       multi_selectable_attr :enum_array1, :convert_with => :binary_string do
@@ -263,7 +263,7 @@ describe SelectableAttr do
 
     it "test_multi_selectable_attr2" do
       # [[], [3], [2], [2, 3], [1], [1, 3], [1, 2], [1, 2, 3]]
-      expected = 
+      expected =
         (0..7).map do |i|
           s = '%03b' % i
           a = s.split('').map{|v| v.to_i}
@@ -297,7 +297,7 @@ describe SelectableAttr do
 
     it "test_multi_selectable_attr_with_comma_string" do
       # ["", "3", "2", "2,3", "1", "1,3", "1,2", "1,2,3"]
-      expected = 
+      expected =
         (0..7).map do |i|
           s = '%03b' % i
           a = s.split('').map{|v| v.to_i}
@@ -311,11 +311,11 @@ describe SelectableAttr do
       assert_multi_enum_instance_methods(EnumMock5WithEnumArray.new, expected)
     end
   end
-   
+
   describe "selectable_attr_name_pattern" do
     class EnumMock6 < EnumBase
       # self.selectable_attr_name_pattern = /(_cd$|_code$|_cds$|_codes$)/
-      selectable_attr :category_id do 
+      selectable_attr :category_id do
         entry "01", :category1, "カテゴリ1"
         entry "02", :category2, "カテゴリ2"
       end
@@ -323,7 +323,7 @@ describe SelectableAttr do
 
     class EnumMock7 < EnumBase
       self.selectable_attr_name_pattern = /(_cd$|_id$|_cds$|_ids$)/
-      selectable_attr :category_id do 
+      selectable_attr :category_id do
         entry "01", :category1, "カテゴリ1"
         entry "02", :category2, "カテゴリ2"
       end
@@ -353,14 +353,14 @@ describe SelectableAttr do
         def table_exists?; end
       end
     end
-    
+
     it "should return false if column does exist" do
       ConnectableMock1.should_receive(:connected?).and_return(true)
       ConnectableMock1.should_receive(:table_exists?).and_return(true)
       ConnectableMock1.should_receive(:columns).and_return([mock(:column1, :name => :column1)])
       ConnectableMock1.has_attr(:column1).should == true
     end
-    
+
     it "should return false if column doesn't exist" do
       ConnectableMock1.should_receive(:connected?).and_return(true)
       ConnectableMock1.should_receive(:table_exists?).and_return(true)
@@ -389,12 +389,12 @@ describe SelectableAttr do
         entry 3, :entry3, "エントリ3"
       end
     end
-    
+
     it "return constant by Symbol access" do
       enum1 = EnumMock10.enum_for(:enum1)
       enum1.class.should == SelectableAttr::Enum
     end
-    
+
     it "return constant by String access" do
       enum1 = EnumMock10.enum_for('enum1')
       enum1.class.should == SelectableAttr::Enum
@@ -413,7 +413,7 @@ describe SelectableAttr do
         def attr_accessor_with_default(*args); end
       end
     end
-    
+
     it "should call attr_accessor_with_default when both of attr_accessor and default are given" do
       DefiningMock1.should_receive(:attr_accessor_with_default).with(:enum1, 1)
       DefiningMock1.define_accessor(:attr => :enum1, :attr_accessor => true, :default => 1)

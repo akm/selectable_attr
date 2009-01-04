@@ -4,21 +4,21 @@ module SelectableAttr
     def self.included(base)
       base.extend(ClassMethods)
     end
-    
+
     ENUM_ARRAY_METHODS = {
-      :none => { 
+      :none => {
         :to_hash_array => Proc.new do |enum, attr_value|
           value = (attr_value || []).map(&:to_s)
           enum.to_hash_array do |hash|
             hash[:select] = value.include?(hash[:id].to_s)
           end
         end,
-        
+
         :to_attr_value => Proc.new do |enum, hash_array|
           hash_array.select{|hash| hash[:select]}.map{|hash| hash[:id]}
         end
       },
-      
+
       :comma_string => {
         :to_hash_array => Proc.new do |enum, attr_value|
           values = attr_value.is_a?(Array) ? attr_value.map{|v|v.to_s} :
@@ -27,13 +27,13 @@ module SelectableAttr
             hash[:select] = values.include?(hash[:id].to_s)
           end
         end,
-        
+
         :to_attr_value => Proc.new do |enum, hash_array|
           hash_array.select{|hash| hash[:select]}.map{|hash| hash[:id]}.join(',')
         end
       },
-      
-      
+
+
       :binary_string => {
         :to_hash_array => Proc.new do |enum, attr_value|
           value = attr_value || ''
@@ -43,7 +43,7 @@ module SelectableAttr
             idx += 1
           end
         end,
-        
+
         :to_attr_value => Proc.new do |enum, hash_array|
           result = ''
           hash_map = hash_array.inject({}){|dest, hash| dest[hash[:id]] = hash; dest}
@@ -55,23 +55,23 @@ module SelectableAttr
         end
       }
     }
-    
+
     module ClassMethods
-      def single_selectable_attrs 
+      def single_selectable_attrs
         @single_selectable_attrs_hash ||= {};
         @single_selectable_attrs_hash[self] ||= []
       end
-      
-      def multi_selectable_attrs 
+
+      def multi_selectable_attrs
         @multi_selectable_attrs_hash ||= {};
         @multi_selectable_attrs_hash[self] ||= []
       end
-      
+
       def selectable_attr_type_for(attr)
         single_selectable_attrs.include?(attr.to_s) ? :single :
         multi_selectable_attrs.include?(attr.to_s) ? :multi : nil
       end
-      
+
       def enum(*args, &block)
         process_definition(block, *args) do |enum, context|
           self.single_selectable_attrs << context[:attr].to_s
@@ -81,8 +81,8 @@ module SelectableAttr
       end
       alias_method :single_selectable_attr, :enum
       alias_method :selectable_attr, :enum
-      
-      
+
+
       def enum_array(*args, &block)
         base_options = args.last.is_a?(Hash) ? args.pop : {}
         args << base_options # .update({:attr_accessor => false})
@@ -93,7 +93,7 @@ module SelectableAttr
         end
       end
       alias_method :multi_selectable_attr, :enum_array
-      
+
       def process_definition(block, *args)
         base_options = args.last.is_a?(Hash) ? args.pop : {}
         enum = base_options[:enum] || create_enum(&block)
@@ -115,7 +115,7 @@ module SelectableAttr
         end
         enum
       end
-      
+
       def has_attr(attr)
         return true if self.method_defined?(attr)
         return false unless self.respond_to?(:columns)
@@ -129,11 +129,11 @@ module SelectableAttr
         (respond_to?(:table_exists?) && self.table_exists?) ?
           (self.columns || []).any?{|col|col.name.to_s == attr.to_s} : false
       end
-      
+
       def attr_enumeable_base(*args, &block)
         @base_name_processor = block
       end
-      
+
       def enum_base_name(attr)
         if @base_name_processor
           @base_name_processor.call(attr).to_s
@@ -141,40 +141,40 @@ module SelectableAttr
           attr.to_s.gsub(selectable_attr_name_pattern, '')
         end
       end
-      
+
       DEFAULT_SELECTABLE_ATTR_NAME_PATTERN = /(_cd$|_code$|_cds$|_codes$)/
-      
+
       def selectable_attr_name_pattern
         @selectable_attr_name_pattern ||= DEFAULT_SELECTABLE_ATTR_NAME_PATTERN
       end
       alias_method :enum_name_pattern, :selectable_attr_name_pattern
-      
+
       def selectable_attr_name_pattern=(value)
         @selectable_attr_name_pattern = value
       end
       alias_method :enum_name_pattern=, :selectable_attr_name_pattern=
-      
+
       def create_enum(&block)
         result = Enum.new
         result.instance_eval(&block)
         result
       end
-      
+
       def define_enum(context)
         base_name = context[:base_name]
         const_name = "#{base_name.upcase}_ENUM"
         const_set(const_name, context[:enum]) unless const_defined?(const_name)
       end
-      
+
       def enum_for(attr)
         base_name = enum_base_name(attr)
         name = "#{base_name.upcase}_ENUM"
         const_defined?(name) ? const_get(name) : nil
       end
-      
+
       def define_accessor(context)
         attr = context[:attr]
-        return unless (instance_methods & [attr, "#{attr}="]).empty? 
+        return unless (instance_methods & [attr, "#{attr}="]).empty?
         if context[:attr_accessor]
           if context[:default]
             if respond_to?(:attr_accessor_with_default)
@@ -197,7 +197,7 @@ module SelectableAttr
           end
         end
       end
-      
+
       def define_enum_class_methods(context)
         base_name = context[:base_name]
         enum = context[:enum]
@@ -225,7 +225,7 @@ module SelectableAttr
         end
         self.extend(mod)
       end
-      
+
       def define_enum_instance_methods(context)
         attr = context[:attr]
         base_name = context[:base_name]
@@ -248,7 +248,7 @@ module SelectableAttr
         EOS
         self.module_eval(instance_methods)
       end
-        
+
       def define_enum_array_instance_methods(context)
         attr = context[:attr]
         base_name = context[:base_name]

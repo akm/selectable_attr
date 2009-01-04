@@ -12,6 +12,6 @@ module SelectableAttr
     end
     def logger=(value)
       @logger = value
-    end    
+    end
   end
 end
