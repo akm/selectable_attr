@@ -14,13 +14,8 @@ desc 'Default: run unit tests.'
 task :default => :spec
 # task :default => [:spec, :cucumber]
 
-desc 'Run all specs under spec/**/*_spec.rb'
-Spec::Rake::SpecTask.new(:spec => 'coverage:clean') do |t|
-  t.spec_files = FileList['spec/**/*_spec.rb']
-  t.spec_opts = ["-c", "--diff"]
-  t.rcov = true
-  t.rcov_opts = ["--include-file", "lib\/*\.rb", "--exclude", "spec\/"]
-end
+desc "Run all examples"
+RSpec::Core::RakeTask.new(:spec)
 
 namespace :spec do
   desc "Run all examples using rcov"
