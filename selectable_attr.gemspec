@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name     = "selectable_attr"
-  s.version  = '0.0.3'
+  s.version  = '0.0.4'
   s.date     = '2009/01/26' # Time.now.strftime("%Y/%m/%d %H:%M:%S")
   s.summary  = "selectable_attr generates extra methods dynamically"
   s.description  = "selectable_attr generates extra methods dynamically for attribute which has options"
