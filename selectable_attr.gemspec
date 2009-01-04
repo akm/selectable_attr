@@ -10,9 +10,6 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/akm/selectable_attr/"
   s.has_rdoc = false
 
-  s.add_dependency("activerecord", ">= 2.1.0")
-  s.add_dependency("selectable_attr", SelectableAttr::VERSION)
-
   s.files = [
     "Rakefile", "init.rb", "install.rb", "uninstall.rb", 
     "lib/selectable_attr/base.rb",
