@@ -5,10 +5,11 @@ Gem::Specification.new do |s|
   s.version  = '0.0.3'
   s.date     = '2009/01/26' # Time.now.strftime("%Y/%m/%d %H:%M:%S")
   s.summary  = "selectable_attr generates extra methods dynamically"
+  s.description  = "selectable_attr generates extra methods dynamically for attribute which has options"
   s.email    = "akima@gmail.com"
-  s.authors  = ["Takeshi Akima"]
   s.homepage = "http://github.com/akm/selectable_attr/"
   s.has_rdoc = false
+  s.authors  = ["Takeshi Akima"]
 
   s.files = [
     "MIT-LICENSE", "README", 
