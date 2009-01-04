@@ -126,7 +126,8 @@ module SelectableAttr
             return nil if !self.connected?
           end
         end
-        (self.columns || []).any?{|col|col.name.to_s == attr.to_s}
+        self.table_exist? ?
+          (self.columns || []).any?{|col|col.name.to_s == attr.to_s} : false
       end
       
       def attr_enumeable_base(*args, &block)
