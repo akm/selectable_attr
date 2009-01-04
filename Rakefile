@@ -1,40 +1,50 @@
-require "bundler"
-Bundler.setup
-Bundler::GemHelper.install_tasks
+require 'rubygems'
+require 'bundler'
+begin
+  Bundler.setup(:default, :development)
+rescue Bundler::BundlerError => e
+  $stderr.puts e.message
+  $stderr.puts "Run `bundle install` to install missing gems"
+  exit e.status_code
+end
+require 'rake'
 
-require "rake"
-require "yaml"
+require 'jeweler'
+Jeweler::Tasks.new do |gem|
+  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
+  gem.name = "selectable_attr"
+  gem.homepage = "http://github.com/akm/selectable_attr/"
+  gem.license = "MIT"
+  gem.summary = %Q{selectable_attr generates extra methods dynamically}
+  gem.description = %Q{selectable_attr generates extra methods dynamically for attribute which has options}
+  gem.email = "akm2000@gmail.com"
+  gem.authors = ["Takeshi Akima"]
+  # Include your dependencies below. Runtime dependencies are required when using your gem,
+  # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
+  #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
+  #  gem.add_development_dependency 'rspec', '> 1.2.3'
+end
+Jeweler::RubygemsDotOrgTasks.new
 
-require "rake/rdoctask"
-require "rspec/core/rake_task"
-require "rspec/core/version"
-# require "cucumber/rake/task"
+require 'rspec/core'
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = FileList['spec/**/*_spec.rb']
+end
 
-desc 'Default: run unit tests.'
+RSpec::Core::RakeTask.new(:rcov) do |spec|
+  spec.pattern = 'spec/**/*_spec.rb'
+  spec.rcov = true
+end
+
 task :default => :spec
-# task :default => [:spec, :cucumber]
 
-desc "Run all examples"
-RSpec::Core::RakeTask.new(:spec)
+require 'rake/rdoctask'
+Rake::RDocTask.new do |rdoc|
+  version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
-namespace :spec do
-  desc "Run all examples using rcov"
-  RSpec::Core::RakeTask.new(:rcov) do |t|
-    t.rcov = true
-    t.rcov_opts =  %[--exclude "gems/*"]
-    # t.rcov_opts << %[--sort]
-  end
-end
-
-task :cleanup_rcov_files do
-  rm_rf 'coverage.data'
-end
-
-desc 'Generate documentation for the selectable_attr plugin.'
-Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'SelectableAttr'
-  rdoc.options << '--line-numbers' << '--inline-source' << '-c UTF-8'
+  rdoc.title = "selectable_attr #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
