@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require File.join(File.dirname(__FILE__), 'spec_helper')
+require 'stringio'
 
 describe SelectableAttr do
   
@@ -421,6 +422,14 @@ describe SelectableAttr do
     it "should call attr_accessor_with_default when default are given but attr_accessor is not TRUE" do
       SelectableAttr.logger.should_receive(:warn).with(":default option ignored for enum1")
       DefiningMock1.define_accessor(:attr => :enum1, :attr_accessor => false, :default => 1)
+    end
+
+    it "warning message to logger" do
+      io = StringIO.new
+      SelectableAttr.logger = Logger.new(io)
+      DefiningMock1.define_accessor(:attr => :enum1, :attr_accessor => false, :default => 1)
+      io.rewind
+      io.read.should =~ /WARN -- : :default option ignored for enum1$/
     end
 
 
