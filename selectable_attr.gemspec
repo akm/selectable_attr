@@ -1,9 +1,7 @@
-# require File.join(File.dirname(__FILE__), 'lib', 'selectable_attr', 'version')
-
 Gem::Specification.new do |s|
   s.name     = "selectable_attr"
-  s.version  = '0.0.4'
-  s.date     = '2009/01/26' # Time.now.strftime("%Y/%m/%d %H:%M:%S")
+  s.version  = "0.0.3"
+  s.date     = "2009/01/26"
   s.summary  = "selectable_attr generates extra methods dynamically"
   s.description  = "selectable_attr generates extra methods dynamically for attribute which has options"
   s.email    = "akima@gmail.com"
