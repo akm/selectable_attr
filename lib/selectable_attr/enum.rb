@@ -7,33 +7,12 @@ module SelectableAttr
       def instances
         @@instances ||= []
       end
-      
-      if defined?(I18n)
-        def i18n_export
-          result = {}
-          instances.each do |instance|
-            unless instance.i18n_scope
-              # puts "no i18n_scope of #{instance.inspect}"
-              next 
-            end
-            paths = instance.i18n_scope.dup
-            current = result
-            paths.each do |path|
-              current = current[path] ||= {}
-            end
-            instance.entries.each do |entry|
-              current[entry.key] = entry.name
-            end
-          end
-          result
-        end
-      end
     end
     
     def initialize(&block)
       @entries = []
       instance_eval(&block) if block_given?
-      SelectableAttr::Enum.instances << self if defined?(I18n)
+      SelectableAttr::Enum.instances << self
     end
     
     def entries
@@ -148,15 +127,7 @@ module SelectableAttr
         self.instance_eval(&block) if block
       end
       
-      if defined?(I18n)
-        def name
-          I18n.locale.nil? ? @name :
-            @enum.i18n_scope.blank? ? @name :
-            I18n.translate(key, :scope => @enum.i18n_scope, :default => @name)
-        end
-      else
-        attr_reader :name
-      end
+      attr_reader :name
       
       def [](option_key)
         BASE_ATTRS.include?(option_key) ? send(option_key) :
