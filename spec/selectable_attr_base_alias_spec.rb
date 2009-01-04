@@ -419,7 +419,7 @@ describe SelectableAttr do
     end
 
     it "should call attr_accessor_with_default when default are given but attr_accessor is not TRUE" do
-      $stderr.should_receive(:puts).with("WARNING! :default option ignored for enum1")
+      SelectableAttr.logger.should_receive(:warn).with(":default option ignored for enum1")
       DefiningMock1.define_accessor(:attr => :enum1, :attr_accessor => false, :default => 1)
     end
 

@@ -193,7 +193,7 @@ module SelectableAttr
           end
         else
           if context[:default]
-            $stderr.puts "WARNING! :default option ignored for #{attr}"
+            SelectableAttr.logger.warn(":default option ignored for #{attr}")
           end
         end
       end
