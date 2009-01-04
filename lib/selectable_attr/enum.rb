@@ -147,7 +147,7 @@ module SelectableAttr
       end
       
       def to_hash
-        (@options || {}).merge(:id => @id, :key => @key, :name => @name)
+        (@options || {}).merge(:id => @id, :key => @key, :name => name)
       end
       
       NULL = new(nil, nil, nil, nil) do
