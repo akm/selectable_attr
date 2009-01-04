@@ -128,11 +128,11 @@ describe SelectableAttr::Enum do
 
   describe :inspect do
     it "NULL" do
-      SelectableAttr::Enum::Entry::NULL.inspect.should =~ /\#<SelectableAttr::Enum::Entry:[0-9a-f]+\ @id=nil,\ @key=nil,\ @name=nil,\ @options=nil/
+      SelectableAttr::Enum::Entry::NULL.inspect.should =~ /\#<SelectableAttr::Enum::Entry:[0-9a-f]+\ @id=nil,\ @key=nil,\ @name=nil,\ @options=nil>/
     end
 
     it "valid" do
-      InetAccess[1].inspect.should =~ /\#<SelectableAttr::Enum::Entry:[0-9a-f]+\ @id=1,\ @key=:email,\ @name="Eメール",\ @options=\{:protocol=>"mailto:"\}/
+      InetAccess[1].inspect.should =~ /\#<SelectableAttr::Enum::Entry:[0-9a-f]+\ @id=1,\ @key=:email,\ @name="Eメール",\ @options=\{:protocol=>"mailto:"\}>/
     end
   end
 

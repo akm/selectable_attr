@@ -153,7 +153,7 @@ module SelectableAttr
 
       def inspect
         # object_idを２倍にしているのは通常のinspectと合わせるためです。
-        '#<%s:%x @id=%s, @key=%s, @name=%s, @options=%s' % [
+        '#<%s:%x @id=%s, @key=%s, @name=%s, @options=%s>' % [
           self.class.name, object_id * 2, id.inspect, key.inspect, name.inspect, @options.inspect]
       end
 
