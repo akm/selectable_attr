@@ -37,3 +37,18 @@ namespace :coverage do
     t.index_html = 'coverage/index.html'
   end
 end
+
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |s|
+    s.name = "selectable_attr"
+    s.summary  = "selectable_attr generates extra methods dynamically"
+    s.description  = "selectable_attr generates extra methods dynamically for attribute which has options"
+    s.email    = "akima@gmail.com"
+    s.homepage = "http://github.com/akm/selectable_attr/"
+    s.authors  = ["Takeshi Akima"]
+  end
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
+end
+
