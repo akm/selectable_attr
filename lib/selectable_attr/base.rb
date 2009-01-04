@@ -126,7 +126,7 @@ module SelectableAttr
             return nil if !self.connected?
           end
         end
-        self.table_exist? ?
+        (respond_to?(:table_exists?) && self.table_exists?) ?
           (self.columns || []).any?{|col|col.name.to_s == attr.to_s} : false
       end
       
