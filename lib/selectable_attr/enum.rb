@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 module SelectableAttr
 
   class Enum
@@ -149,7 +150,13 @@ module SelectableAttr
       def to_hash
         (@options || {}).merge(:id => @id, :key => @key, :name => name)
       end
-      
+
+      def inspect
+        # object_idを２倍にしているのは通常のinspectと合わせるためです。
+        '#<%s:%x @id=%s, @key=%s, @name=%s, @options=%s' % [
+          self.class.name, object_id * 2, id.inspect, key.inspect, name.inspect, @options.inspect]
+      end
+
       NULL = new(nil, nil, nil, nil) do
         def null?; true; end
         def name; nil; end
