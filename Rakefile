@@ -19,11 +19,15 @@ RSpec::Core::RakeTask.new(:spec)
 
 namespace :spec do
   desc "Run all examples using rcov"
-  RSpec::Core::RakeTask.new :rcov => :cleanup_rcov_files do |t|
+  RSpec::Core::RakeTask.new(:rcov) do |t|
     t.rcov = true
-    t.rcov_opts =  %[-Ilib -Ispec --exclude "gems/*,features"]
-    t.rcov_opts << %[--text-report --sort coverage --no-html --aggregate coverage.data]
+    t.rcov_opts =  %[--exclude "gems/*"]
+    # t.rcov_opts << %[--sort]
   end
+end
+
+task :cleanup_rcov_files do
+  rm_rf 'coverage.data'
 end
 
 desc 'Generate documentation for the selectable_attr plugin.'
