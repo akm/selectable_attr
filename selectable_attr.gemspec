@@ -5,17 +5,18 @@
 
 Gem::Specification.new do |s|
   s.name = %q{selectable_attr}
-  s.version = "0.3.13"
+  s.version = "0.3.14"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Takeshi Akima"]
-  s.date = %q{2011-02-06}
+  s.date = %q{2011-02-19}
   s.description = %q{selectable_attr generates extra methods dynamically for attribute which has options}
   s.email = %q{akm2000@gmail.com}
   s.extra_rdoc_files = [
     "README"
   ]
   s.files = [
+    ".gemtest",
     "Gemfile",
     "MIT-LICENSE",
     "README",
