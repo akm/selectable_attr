@@ -92,6 +92,7 @@ if defined?(I18n)
 
     class SelectableAttrMock2 < EnumBase
       selectable_attr :enum1, :default => 2 do
+        i18n_scope(:selectable_attrs, :enum1)
         entry 1, :entry1, "エントリ1"
         entry 2, :entry2, "エントリ2"
         entry 3, :entry3, "エントリ3"
@@ -227,8 +228,49 @@ if defined?(I18n)
       assert_equal [['書籍', '01'], ['DVD', '02'], ['CD', '03'], ['その他', '09']], ProductWithI18nDB1.product_type_options
     end
 
+    def test_i18n_export
+      I18nItemMaster.delete_all("category_name = 'product_type_cd'")
 
+      I18n.locale = 'ja'
+      actual = SelectableAttr::Enum.i18n_export
+      assert_equal [:selectable_attrs], actual.keys
+      assert_equal true, actual[:selectable_attrs].keys.include?(:enum1)
+      assert_equal(
+        {:entry1=>"エントリ壱",
+         :entry2=>"エントリ弐",
+         :entry3=>"エントリ参"},
+        actual[:selectable_attrs][:enum1])
 
-  
+      assert_equal true, actual[:selectable_attrs].keys.include?(:SelectableAttrI18nTest)
+      assert_equal(
+        {:ProductWithI18nDB1=>
+          {:product_type_cd=>
+            {:book=>"書籍", :dvd=>"DVD", :cd=>"CD", :other=>"その他"}}}, 
+        actual[:selectable_attrs][:SelectableAttrI18nTest])
+      
+
+      I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 1, :item_cd => '09', :name => 'Others')
+      I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 2, :item_cd => '02', :name => 'DVD')
+      I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 3, :item_cd => '03', :name => 'CD')
+      I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 4, :item_cd => '01', :name => 'Book')
+      I18nItemMaster.create(:locale => 'en', :category_name => 'product_type_cd', :item_no => 5, :item_cd => '04', :name => 'Toy')
+      
+      I18n.locale = 'en'
+      actual = SelectableAttr::Enum.i18n_export
+      assert_equal [:selectable_attrs], actual.keys
+      assert_equal true, actual[:selectable_attrs].keys.include?(:enum1)
+      assert_equal(
+        {:entry1=>"entry one",
+         :entry2=>"entry two",
+         :entry3=>"entry three"},
+        actual[:selectable_attrs][:enum1])
+      assert_equal true, actual[:selectable_attrs].keys.include?(:SelectableAttrI18nTest)
+      assert_equal(
+        {:ProductWithI18nDB1=>
+          {:product_type_cd=>
+            {:book=>"Book", :dvd=>"DVD", :cd=>"CD", :other=>"Others", :entry_04=>"Toy"}}}, 
+        actual[:selectable_attrs][:SelectableAttrI18nTest])
+      
+    end
   end
 end
