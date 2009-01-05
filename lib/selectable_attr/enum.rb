@@ -3,10 +3,38 @@ module SelectableAttr
   class Enum
     include Enumerable
     include SelectableAttr::DbLoadable
+
+    class << self
+      def instances
+        @@instances ||= []
+      end
+      
+      if defined?(I18n)
+        def i18n_export
+          result = {}
+          instances.each do |instance|
+            unless instance.i18n_scope
+              # puts "no i18n_scope of #{instance.inspect}"
+              next 
+            end
+            paths = instance.i18n_scope.dup
+            current = result
+            paths.each do |path|
+              current = current[path] ||= {}
+            end
+            instance.entries.each do |entry|
+              current[entry.key] = entry.name
+            end
+          end
+          result
+        end
+      end
+    end
     
     def initialize(&block)
       @entries = []
       instance_eval(&block) if block_given?
+      SelectableAttr::Enum.instances << self if defined?(I18n)
     end
     
     def entries

@@ -107,7 +107,11 @@ module SelectableAttr
           define_enum(context)
           define_accessor(context)
           yield(enum, context)
-          enum.i18n_scope(:selectable_attrs, attr.to_sym) unless enum.i18n_scope
+          unless enum.i18n_scope
+            paths = [:selectable_attrs] + self.name.to_s.split('::').map{|s| s.to_sym}
+            paths << attr.to_sym
+            enum.i18n_scope(*paths)
+          end
         end
         enum
       end
