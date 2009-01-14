@@ -270,6 +270,7 @@ if defined?(I18n)
           {:product_type_cd=>
             {:book=>"Book", :dvd=>"DVD", :cd=>"CD", :other=>"Others", :entry_04=>"Toy"}}}, 
         actual[:selectable_attrs][:SelectableAttrI18nTest])
+      
     end
   end
 end
