@@ -119,6 +119,13 @@ module SelectableAttr
       def has_attr(attr)
         return true if self.method_defined?(attr)
         return false unless self.respond_to?(:columns)
+        if self.respond_to?(:connection) and self.respond_to?(:connected?)
+          begin
+            self.connection unless self.connected?
+          rescue Exception
+            return nil if !self.connected?
+          end
+        end
         (self.columns || []).any?{|col|col.name.to_s == attr.to_s}
       end
       
@@ -165,7 +172,7 @@ module SelectableAttr
       
       def define_accessor(context)
         attr = context[:attr]
-        return unless (instance_methods(false) & [attr, "#{attr}="]).empty? 
+        return unless (instance_methods & [attr, "#{attr}="]).empty? 
         if context[:attr_accessor]
           if context[:default]
             attr_accessor_with_default(attr, context[:default])
