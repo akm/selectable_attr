@@ -2,7 +2,6 @@ module SelectableAttr
 
   class Enum
     include Enumerable
-    include SelectableAttr::DbLoadable
 
     class << self
       def instances
