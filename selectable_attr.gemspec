@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.has_rdoc = false
 
   spec.add_dependency("activerecord", ">= 2.1.0")
-  spec.add_dependency("selectable_attr", SelectableAttrRails::VERSION)
+  spec.add_dependency("selectable_attr", SelectableAttr::VERSION)
 
   spec.files         = FileList['Rakefile', 'bin/*', '*.rb', '{lib,test}/**/*.{rb}', 'tasks/**/*.{rake}'].to_a
   spec.require_path  = "lib"
