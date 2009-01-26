@@ -84,7 +84,7 @@ module SelectableAttr
       
       
       def enum_array(*args, &block)
-        base_options = args.extract_options!
+        base_options = args.last.is_a?(Hash) ? args.pop : {}
         args << base_options # .update({:attr_accessor => false})
         process_definition(block, *args) do |enum, context|
           self.multi_selectable_attrs << context[:attr].to_s
@@ -95,7 +95,7 @@ module SelectableAttr
       alias_method :multi_selectable_attr, :enum_array
       
       def process_definition(block, *args)
-        base_options = args.extract_options!
+        base_options = args.last.is_a?(Hash) ? args.pop : {}
         enum = base_options[:enum] || create_enum(&block)
         args.each do |attr|
           context = {
@@ -175,7 +175,17 @@ module SelectableAttr
         return unless (instance_methods & [attr, "#{attr}="]).empty? 
         if context[:attr_accessor]
           if context[:default]
-            attr_accessor_with_default(attr, context[:default])
+            if respond_to?(:attr_accessor_with_default)
+              attr_accessor_with_default(attr, context[:default])
+            else
+              instance_var_name = "@#{attr}"
+              attr_writer(attr)
+              define_method(attr) do
+                value = instance_variable_get(instance_var_name)
+                instance_variable_set(instance_var_name, value = context[:default]) unless value
+                value
+              end
+            end
           else
             attr_accessor(attr)
           end
