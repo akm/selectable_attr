@@ -5,6 +5,16 @@ require 'i18n'
 
 describe SelectableAttr::Enum do
 
+  before(:all) do
+    @default_locale_backup = I18n.default_locale
+    @locale_backup = I18n.locale
+  end
+
+  after(:all) do
+    I18n.locale = @locale_backup
+    I18n.default_locale = @default_locale_backup
+  end
+
   before(:each) do
     I18n.backend = I18n::Backend::Simple.new
     I18n.backend.store_translations 'en', 'selectable_attrs' => {'enum1' => {
@@ -61,7 +71,9 @@ describe SelectableAttr::Enum do
   end
 
   it 'test_attr1_i18n' do
+    I18n.locale = :en
     I18n.default_locale = 'ja'
+    I18n.locale = :ja
     I18n.locale.should == :ja
     SelectableAttrMock1.attr1_name_by_key(:entry1).should == "エントリ壱"
     SelectableAttrMock1.attr1_name_by_key(:entry2).should == "エントリ弐"

@@ -128,7 +128,11 @@ module SelectableAttr
         self.instance_eval(&block) if block
       end
 
-      attr_reader :name
+      def name
+        I18n.locale.nil? ? @name :
+          @enum.i18n_scope.nil? ? @name :
+          I18n.translate(key, :scope => @enum.i18n_scope, :default => @name)
+      end
 
       def [](option_key)
         BASE_ATTRS.include?(option_key) ? send(option_key) :
