@@ -1,6 +1,7 @@
 = SelectableAttr
 
-"!https://secure.travis-ci.org/akm/selectable_attr.png!":http://travis-ci.org/akm/selectable_attr
+{<img src="http://travis-ci.org/akm/selectable_attr.png" />}[http://travis-ci.org/akm/selectable_attr]
+このgemはTravisでテストされています。 http://travis-ci.org/#!/akm/selectable_attr
 
 == Introduction
 selectable_attr は、コードが割り振られるような特定の属性について*コード*、*プログラム上での名前*、
