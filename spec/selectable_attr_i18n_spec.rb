@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 require File.expand_path('spec_helper', File.dirname(__FILE__))
 
+require 'i18n'
+
 describe SelectableAttr::Enum do
 
   before(:each) do
