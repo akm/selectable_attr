@@ -1,8 +1,10 @@
 /*.gem
 /.bundle
 /.rvmrc
+/.yardoc
 /Gemfile.lock
 /coverage
+/doc
 /pkg
 /rdoc
 /selectable_attr_test.sqlite3.db
