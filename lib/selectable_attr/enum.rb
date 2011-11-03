@@ -105,7 +105,7 @@ module SelectableAttr
     def to_hash_array
       entries.map do |entry|
         result = entry.to_hash
-        yield(result) if defined? yield
+        yield(result) if block_given?
         result
       end
     end
