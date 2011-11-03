@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-if defined?(I18n)
   require File.expand_path('spec_helper', File.dirname(__FILE__))
 
   describe SelectableAttr::Enum do
@@ -314,6 +313,3 @@ if defined?(I18n)
       io.readline.should =~ /^no\ i18n_scope\ of\ /
     end
   end
-else
-  $stderr.puts "WARNING! i18n test skipeed because I18n not found"
-end
