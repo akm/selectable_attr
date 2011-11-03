@@ -29,7 +29,7 @@ describe SelectableAttr::Enum do
       } }
   end
 
-  Enum1 = SelectableAttr::Enum.new do
+  EnumI18n1 = SelectableAttr::Enum.new do
     i18n_scope(:selectable_attrs, :enum1)
     entry 1, :entry1, "エントリ1"
     entry 2, :entry2, "エントリ2"
@@ -39,22 +39,22 @@ describe SelectableAttr::Enum do
   it 'test_enum1_i18n' do
     I18n.locale = nil
     I18n.locale.should == :en
-    Enum1.name_by_key(:entry1).should == "entry one"
-    Enum1.name_by_key(:entry2).should == "entry two"
-    Enum1.name_by_key(:entry3).should == "entry three"
-    Enum1.names.should == ["entry one", "entry two", "entry three"]
+    EnumI18n1.name_by_key(:entry1).should == "entry one"
+    EnumI18n1.name_by_key(:entry2).should == "entry two"
+    EnumI18n1.name_by_key(:entry3).should == "entry three"
+    EnumI18n1.names.should == ["entry one", "entry two", "entry three"]
 
     I18n.locale = 'ja'
-    Enum1.name_by_key(:entry1).should == "エントリ壱"
-    Enum1.name_by_key(:entry2).should == "エントリ弐"
-    Enum1.name_by_key(:entry3).should == "エントリ参"
-    Enum1.names.should == ["エントリ壱", "エントリ弐", "エントリ参"]
+    EnumI18n1.name_by_key(:entry1).should == "エントリ壱"
+    EnumI18n1.name_by_key(:entry2).should == "エントリ弐"
+    EnumI18n1.name_by_key(:entry3).should == "エントリ参"
+    EnumI18n1.names.should == ["エントリ壱", "エントリ弐", "エントリ参"]
 
     I18n.locale = 'en'
-    Enum1.name_by_key(:entry1).should == "entry one"
-    Enum1.name_by_key(:entry2).should == "entry two"
-    Enum1.name_by_key(:entry3).should == "entry three"
-    Enum1.names.should == ["entry one", "entry two", "entry three"]
+    EnumI18n1.name_by_key(:entry1).should == "entry one"
+    EnumI18n1.name_by_key(:entry2).should == "entry two"
+    EnumI18n1.name_by_key(:entry3).should == "entry three"
+    EnumI18n1.names.should == ["entry one", "entry two", "entry three"]
   end
 
   class EnumBase
