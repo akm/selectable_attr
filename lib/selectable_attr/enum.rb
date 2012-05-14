@@ -16,6 +16,12 @@ module SelectableAttr
       SelectableAttr::Enum.instances << self
     end
 
+    attr_writer :name
+    def name(val = nil)
+      @name = val if val
+      @name
+    end
+
     def entries
       @entries
     end

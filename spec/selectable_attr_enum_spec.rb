@@ -136,4 +136,26 @@ describe SelectableAttr::Enum do
     end
   end
 
+
+  describe "SelectableAttr::Enum#name" do
+    context "unspecified" do
+      subject { SelectableAttr::Enum.new }
+      its(:name){ should == nil}
+    end
+
+    context "unspecified" do
+      subject { r = SelectableAttr::Enum.new; r.name = "foo"; r }
+      its(:name){ should == "foo"}
+    end
+
+    context "unspecified" do
+      subject do
+        SelectableAttr::Enum.new do
+          name "bar"
+        end
+      end
+      its(:name){ should == "bar"}
+    end
+  end
+
 end
