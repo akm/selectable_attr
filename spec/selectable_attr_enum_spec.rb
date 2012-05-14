@@ -158,4 +158,107 @@ describe SelectableAttr::Enum do
     end
   end
 
+  describe "SelectableAttr::Enum::Entry#==" do
+    context "same enum entry" do
+      subject{ Enum1.entry_by_id(1) } # entry 1, :book, '書籍'
+      it{ should == subject}
+      it{ should === subject}
+      it{ should eql(subject)}
+      it{ should equal(subject)}
+    end
+
+    context "an enum entry which has same attributes" do
+      subject do
+        enum = SelectableAttr::Enum.new{ entry(1, :book, '書籍') }
+        enum.entry_by_id(1)
+      end
+      before{ @other = Enum1.entry_by_id(1) }
+      it{ should == @other}
+      it{ should === @other}
+      it{ should_not eql(@other)}
+      it{ should_not equal(@other)}
+    end
+
+    context "an enum entry which has same id and key" do
+      subject do
+        enum = SelectableAttr::Enum.new{ entry(1, :book, '料理') }
+        enum.entry_by_id(1)
+      end
+      before{ @other = Enum1.entry_by_id(1) }
+      it{ should == @other}
+      it{ should === @other}
+      it{ should_not eql(@other)}
+      it{ should_not equal(@other)}
+    end
+
+    context "an enum entry which has same id" do
+      subject do
+        enum = SelectableAttr::Enum.new{ entry(1, :cook, '料理') }
+        enum.entry_by_id(1)
+      end
+      before{ @other = Enum1.entry_by_id(1) }
+      it{ should == @other}
+      it{ should_not === @other}
+      it{ should_not eql(@other)}
+      it{ should_not equal(@other)}
+    end
+  end
+
+  describe "SelectableAttr::Enum#==" do
+    context "same enum object" do
+      subject{ Enum1 }
+      it{ should == Enum1}
+      it{ should === Enum1}
+      it{ should eql(Enum1)}
+      it{ should equal(Enum1)}
+    end
+
+    context "an object which has same entries" do
+      subject do
+        SelectableAttr::Enum.new do
+          entry 1, :book, '書籍'
+          entry 2, :dvd, 'DVD'
+          entry 3, :cd, 'CD'
+          entry 4, :vhs, 'VHS'
+        end
+      end
+
+      it{ should == Enum1}
+      it{ should === Enum1}
+      it{ should_not eql(Enum1)}
+      it{ should_not equal(Enum1)}
+    end
+
+    context "an object which has entries with same id" do
+      subject do
+        SelectableAttr::Enum.new do
+          entry 1, :cook, '料理'
+          entry 2, :blueray, 'BD'
+          entry 3, :mv, 'Move Directory'
+          entry 4, :UHF, 'Ultra High Frequency'
+        end
+      end
+
+      it{ should == Enum1}
+      it{ should_not === Enum1}
+      it{ should_not eql(Enum1)}
+      it{ should_not equal(Enum1)}
+    end
+
+    context "an object which has same entries with different order" do
+      subject do
+        SelectableAttr::Enum.new do
+          entry 1, :book, '書籍'
+          entry 3, :cd, 'CD'
+          entry 4, :vhs, 'VHS'
+          entry 2, :dvd, 'DVD'
+        end
+      end
+
+      it{ should_not == Enum1}
+      it{ should_not === Enum1}
+      it{ should_not eql(Enum1)}
+      it{ should_not equal(Enum1)}
+    end
+  end
 end

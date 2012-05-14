@@ -30,6 +30,18 @@ module SelectableAttr
       entries.each(&block)
     end
 
+    def ==(other)
+      return false unless length == other.length
+      other_entries = other.entries
+      entries.map.with_index{|e, i| e == other_entries[i]}.all?
+    end
+
+    def ===(other)
+      return false unless length == other.length
+      other_entries = other.entries
+      entries.map.with_index{|e, i| e === other_entries[i]}.all?
+    end
+
     def define(id, key, name, options = nil, &block)
       entry = Entry.new(self, id, key, name, options, &block)
       entry.instance_variable_set(:@defined_in_code, true)
@@ -123,7 +135,7 @@ module SelectableAttr
 
     class Entry
       BASE_ATTRS = [:id, :key, :name]
-      attr_reader :id, :key
+      attr_reader :id, :key, :options
       attr_reader :defined_in_code
       def initialize(enum, id, key, name, options = nil, &block)
         @enum = enum
@@ -147,6 +159,24 @@ module SelectableAttr
 
       def match?(options)
         @options === options
+      end
+
+      def ==(other)
+        case other
+        when SelectableAttr::Enum::Entry
+          self.id == other.id
+        else
+          false
+        end
+      end
+
+      def ===(other)
+        case other
+        when SelectableAttr::Enum::Entry
+          (self.id == other.id) && (self.key == other.key)
+        else
+          false
+        end
       end
 
       def null?
