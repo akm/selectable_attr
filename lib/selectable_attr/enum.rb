@@ -33,13 +33,23 @@ module SelectableAttr
     def ==(other)
       return false unless length == other.length
       other_entries = other.entries
-      entries.map.with_index{|e, i| e == other_entries[i]}.all?
+      # ruby-1.8系ではEnumeratir#with_indexが使えないので1.8でも使用可能な書き方に変更しました。
+      # entries.map.with_index{|e, i| e == other_entries[i]}.all? # for 1.9
+      entries.each_with_index do |e, i|
+        return false unless e == other_entries[i]
+      end
+      true
     end
 
     def ===(other)
       return false unless length == other.length
       other_entries = other.entries
-      entries.map.with_index{|e, i| e === other_entries[i]}.all?
+      # ruby-1.8系ではEnumeratir#with_indexが使えないので1.8でも使用可能な書き方に変更しました。
+      # entries.map.with_index{|e, i| e === other_entries[i]}.all?
+      entries.each_with_index do |e, i|
+        return false unless e === other_entries[i]
+      end
+      true
     end
 
     def define(id, key, name, options = nil, &block)
