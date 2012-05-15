@@ -16,12 +16,40 @@ module SelectableAttr
       SelectableAttr::Enum.instances << self
     end
 
+    attr_writer :name
+    def name(val = nil)
+      @name = val if val
+      @name
+    end
+
     def entries
       @entries
     end
 
     def each(&block)
       entries.each(&block)
+    end
+
+    def ==(other)
+      return false unless length == other.length
+      other_entries = other.entries
+      # ruby-1.8系ではEnumeratir#with_indexが使えないので1.8でも使用可能な書き方に変更しました。
+      # entries.map.with_index{|e, i| e == other_entries[i]}.all? # for 1.9
+      entries.each_with_index do |e, i|
+        return false unless e == other_entries[i]
+      end
+      true
+    end
+
+    def ===(other)
+      return false unless length == other.length
+      other_entries = other.entries
+      # ruby-1.8系ではEnumeratir#with_indexが使えないので1.8でも使用可能な書き方に変更しました。
+      # entries.map.with_index{|e, i| e === other_entries[i]}.all?
+      entries.each_with_index do |e, i|
+        return false unless e === other_entries[i]
+      end
+      true
     end
 
     def define(id, key, name, options = nil, &block)
@@ -117,7 +145,7 @@ module SelectableAttr
 
     class Entry
       BASE_ATTRS = [:id, :key, :name]
-      attr_reader :id, :key
+      attr_reader :id, :key, :options
       attr_reader :defined_in_code
       def initialize(enum, id, key, name, options = nil, &block)
         @enum = enum
@@ -141,6 +169,24 @@ module SelectableAttr
 
       def match?(options)
         @options === options
+      end
+
+      def ==(other)
+        case other
+        when SelectableAttr::Enum::Entry
+          self.id == other.id
+        else
+          false
+        end
+      end
+
+      def ===(other)
+        case other
+        when SelectableAttr::Enum::Entry
+          (self.id == other.id) && (self.key == other.key)
+        else
+          false
+        end
       end
 
       def null?
